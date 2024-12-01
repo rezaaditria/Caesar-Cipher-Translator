@@ -1,7 +1,6 @@
 "use client";
-import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
 import { caesarCipher } from "@/app/utils/caesarCipher";
+import { useState } from "react";
 
 const Home: React.FC = () => {
   const [inputText, setInputText] = useState<string>("");
