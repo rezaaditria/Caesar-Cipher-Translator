@@ -1,101 +1,340 @@
-import Image from "next/image";
+"use client";
+import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
+import { caesarCipher } from "@/app/utils/caesarCipher";
 
-export default function Home() {
+const Home: React.FC = () => {
+  const [inputText, setInputText] = useState<string>("");
+  const [outputText, setOutputText] = useState<string>("");
+  const [shift, setShift] = useState<number>(3); // Default shift
+  const [mode, setMode] = useState<"encrypt" | "decrypt">("encrypt");
+
+  const [language, setLanguage] = useState<"en" | "id">("en");
+
+  const toggleLanguage = () => {
+    setLanguage((prevLanguage) => (prevLanguage === "en" ? "id" : "en"));
+  };
+
+  const handleSwap = () => {
+    setMode((prevMode) => (prevMode === "encrypt" ? "decrypt" : "encrypt"));
+    setInputText(outputText); // Swap input with output
+    setOutputText(""); // Clear the output field
+  };
+
+  const handleCipher = () => {
+    const isEncrypt = mode === "encrypt";
+    const output = caesarCipher(inputText, shift, isEncrypt);
+    setOutputText(output);
+  };
+
+  // Helper function to generate the shifted alphabet for visualization
+  const generateShiftedAlphabet = (shift: number) => {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const shiftedAlphabet = alphabet.slice(shift) + alphabet.slice(0, shift); // Shift the alphabet
+    return { original: alphabet, shifted: shiftedAlphabet };
+  };
+
+  const { original, shifted } = generateShiftedAlphabet(shift);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-t from-blue-300 to-white text-gray-800 p-4 overflow-auto">
+      <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 md:mb-12">
+        {language === "en"
+          ? "Caesar Cipher Translator"
+          : "Penerjemah Caesar Cipher"}
+      </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Language Toggle Button */}
+      <button
+        onClick={toggleLanguage}
+        className="p-2 bg-slate-400 text-white rounded-full mb-6  transition"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-languages"
+        >
+          <path d="m5 8 6 6" />
+          <path d="m4 14 6-6 2-3" />
+          <path d="M2 5h12" />
+          <path d="M7 2h1" />
+          <path d="m22 22-5-10-5 10" />
+          <path d="M14 18h6" />
+        </svg>
+      </button>
+
+      {/* Input Section */}
+      <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-4 w-full max-w-4xl">
+        <div className="w-full md:w-1/2">
+          <h2 className="text-lg font-semibold mb-2 text-center">
+            {mode === "encrypt"
+              ? language === "en"
+                ? "Plain Text Input"
+                : "Masukkan Teks Biasa"
+              : language === "en"
+              ? "Cipher Text Input"
+              : "Masukkan Teks Cipher"}
+          </h2>
+          <textarea
+            placeholder={`${
+              mode === "encrypt"
+                ? language === "en"
+                  ? "Enter plain text"
+                  : "Masukkan teks biasa"
+                : language === "en"
+                ? "Enter cipher text"
+                : "Masukkan teks cipher"
+            }`}
+            className="w-full p-4 border rounded-2xl resize-none h-40"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        {/* Swap Button */}
+        <button
+          onClick={handleSwap}
+          className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition mt-4 md:mt-0"
+          title={
+            language === "en"
+              ? "Swap Encrypt/Decrypt"
+              : "Tukar Enkripsi/ Dekripsi"
+          }
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-arrow-left-right"
+          >
+            <path d="M8 3 4 7l4 4" />
+            <path d="M4 7h16" />
+            <path d="m16 21 4-4-4-4" />
+            <path d="M20 17H4" />
+          </svg>
+        </button>
+
+        {/* Output Section */}
+        <div className="w-full md:w-1/2">
+          <h2 className="text-lg font-semibold mb-2 text-center">
+            {mode === "encrypt"
+              ? language === "en"
+                ? "Cipher Text Output"
+                : "Hasil Teks Cipher"
+              : language === "en"
+              ? "Plain Text Output"
+              : "Hasil Teks Biasa"}
+          </h2>
+          <textarea
+            readOnly
+            placeholder={`${
+              mode === "encrypt"
+                ? language === "en"
+                  ? "Your cipher text"
+                  : "Teks cipher Anda"
+                : language === "en"
+                ? "Your plain text"
+                : "Teks biasa Anda"
+            }`}
+            className="w-full p-4 border rounded-2xl resize-none h-40 bg-gray-50"
+            value={outputText}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+      </div>
+
+      {/* Key Input and Button */}
+      <div className="flex flex-col items-center mt-6 w-full max-w-4xl space-y-4">
+        <div className="flex flex-col items-center">
+          <h2 className="text-lg font-semibold mb-2">
+            {language === "en" ? "Key" : "Kunci"}
+          </h2>
+          <input
+            type="number"
+            className="w-1/2 p-2 border rounded-2xl text-center appearance-none [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
+            placeholder={language === "en" ? "Shift value" : "Nilai pergeseran"}
+            value={shift}
+            onChange={(e) => setShift(Number(e.target.value))}
+          />
+        </div>
+        <button
+          onClick={handleCipher}
+          className="w-1/2 p-2 bg-green-500 text-white rounded-2xl hover:bg-green-600 transition "
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {mode === "encrypt"
+            ? language === "en"
+              ? "Encrypt Text"
+              : "Enkripsi Teks"
+            : language === "en"
+            ? "Decrypt Text"
+            : "Dekripsi Teks"}
+        </button>
+      </div>
+
+      {/* Explanation and Visualization Section */}
+      <div className="w-full max-w-4xl mt-12 text-center bg-gradient-to-t from-blue-300 to-white-50/50 rounded-xl p-12">
+        <h2 className="text-xl font-bold mb-4">
+          {language === "en"
+            ? "How Caesar Cipher Works"
+            : "Cara Kerja Caesar Cipher"}
+        </h2>
+        <p className="mb-4 text-lg text-justify">
+          {language === "en"
+            ? "The Caesar Cipher works by shifting each letter in the text by a set number (key). When encrypting, each letter is shifted forward in the alphabet by the shift value. To decrypt, the letters are shifted back by the same amount."
+            : "Caesar Cipher bekerja dengan menggeser setiap huruf dalam teks dengan jumlah yang ditentukan (kunci). Saat mengenkripsi, setiap huruf digeser maju dalam alfabet sesuai dengan nilai pergeseran. Untuk mendekripsi, huruf-huruf digeser kembali dengan jumlah yang sama."}
+        </p>
+      </div>
+
+      {/* Visualization with Plain Example */}
+      <div className="w-full max-w-4xl mt-12 text-center  rounded-xl px-12">
+        <h3 className="text-3xl font-extrabold my-12 ">
+          {language === "en"
+            ? "Encryption Visualization"
+            : "Visualisasi Enkripsi"}
+        </h3>
+        <div className="mb-6">
+          <div className="text-xl mb-2 flex gap-12 justify-center">
+            <strong>
+              {language === "en" ? "Plain Text: " : "Teks Biasa: "}
+              <span className="font-normal">HELLO</span>
+            </strong>
+
+            <div className="text-xl mb-2">
+              <strong>
+                {language === "en" ? "Shift by: " : "Pergeseran: "}
+              </strong>
+              {shift}
+            </div>
+            <div className="text-xl">
+              <strong>
+                {language === "en" ? "Cipher Text: " : "Teks Cipher: "}
+              </strong>
+              {caesarCipher("HELLO", shift, true)}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex justify-center mb-8">
+              <div className="mr-8">
+                <h5 className="text-md font-semibold">
+                  {language === "en" ? "Original Alphabet" : "Alfabet Asli"}
+                </h5>
+                <div className="flex justify-evenly mb-4 gap-1">
+                  {original.split("").map((char, index) => (
+                    <div
+                      key={index}
+                      className="w-10 h-10 flex justify-center items-center bg-white rounded-full"
+                    >
+                      {char}
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <h5 className="text-md font-semibold">
+                    {language === "en"
+                      ? "Shifted Alphabet"
+                      : "Alfabet yang Digeser"}
+                  </h5>
+                  <div className="flex justify-evenly mb-4">
+                    {shifted.split("").map((char, index) => (
+                      <div
+                        key={index}
+                        className="w-10 h-10 flex justify-center items-center bg-white rounded-full"
+                      >
+                        {char}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Decryption Example */}
+      <div className="w-full max-w-4xl mt-12 text-center  rounded-xl px-12">
+        <h3 className="text-3xl font-extrabold my-12">
+          {language === "en"
+            ? "Decryption Visualization"
+            : "Visualisasi Dekripsi"}
+        </h3>
+        <div>
+          <div className="text-xl mb-2 flex gap-12 justify-center">
+            <strong>
+              {language === "en" ? "Cipher Text:" : "Teks Cipher:"}
+              <span className="font-normal">
+                {caesarCipher("HELLO", shift, true)}
+              </span>
+            </strong>
+
+            <div className="text-xl mb-2">
+              <strong>
+                {language === "en" ? "Shift by: " : "Pergeseran: "}
+              </strong>
+              {shift}
+            </div>
+            <div className="text-xl">
+              <strong>
+                {language === "en" ? "Plain Text: " : "Teks Biasa: "}
+              </strong>
+              {caesarCipher(caesarCipher("HELLO", shift, true), shift, false)}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex justify-center mb-8">
+              <div className="mr-8">
+                <h5 className="text-md font-semibold">
+                  {language === "en"
+                    ? "Shifted Alphabet"
+                    : "Alfabet yang Digeser"}
+                </h5>
+                <div className="flex justify-evenly mb-4 gap-1">
+                  {shifted.split("").map((char, index) => (
+                    <div
+                      key={index}
+                      className="w-10 h-10 flex justify-center items-center bg-white rounded-full"
+                    >
+                      {char}
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <h5 className="text-md font-semibold">
+                    {language === "en" ? "Original Alphabet" : "Alfabet Asli"}
+                  </h5>
+                  <div className="flex justify-evenly mb-4">
+                    {original.split("").map((char, index) => (
+                      <div
+                        key={index}
+                        className="w-10 h-10 flex justify-center items-center bg-white rounded-full"
+                      >
+                        {char}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Home;
